@@ -6,9 +6,13 @@ from struct import pack, unpack
 from socket import inet_ntoa
 from random import randint
 import argparse
+import sys
 
 
 PACKAGE_FORMAT = '!HBc128s'
+
+def dbg( string ):
+    sys.stderr.write( string + "\n")
 
 
 class MeshNodeProtocol(protocol.Protocol):
@@ -53,7 +57,7 @@ class MeshNode(object):
     def add_neighbor(self, node):
         self.neighbors[self.neighbor_id] = node
         node.neighbor_id = self.neighbor_id
-        print "nachbar hinzugekommen mit id %s" % node.neighbor_id
+	dbg( "nachbar hinzugekommen mit id %s" % node.neighbor_id )
         self.neighbor_id += 1
 
     def remove_neighbor(self, node):
@@ -62,15 +66,15 @@ class MeshNode(object):
             if self.valid_routes[target] == node:
                 del self.valid_routes[target]
 
-        print "nachbar verschwunden mit id %s" % node.neighbor_id
+        dbg( "nachbar verschwunden mit id %s" % node.neighbor_id )
 
     def handle_packet(self, data, source):
         packet_id, target, packet_type, content = unpack(PACKAGE_FORMAT, data)
-        # print "packet erhalten id=%s, type=%s" % (packet_id, packet_type)
+        # dbg( "packet erhalten id=%s, type=%s" % (packet_id, packet_type) )
         if packet_type == 'C':
             if self.is_sink and target == 1 or self.is_source and target == 0:
                 # packet is angekommen
-                print u"Packet %s is angekommen." % packet_id
+		dbg( "Paket %s angekommen" % packet_id )
                 packet = pack(PACKAGE_FORMAT, packet_id, target, 'O', ' ' * 128)
                 source.send_packet(packet)
                 return
@@ -85,7 +89,7 @@ class MeshNode(object):
                 self.valid_routes[target].send_packet(data)
             else:
                 # route existiert nicht
-                print 'route existiert nicht'
+                dbg( 'route existiert nicht' )
                 for neighbor_id, neighbor in self.neighbors.items():
                     if neighbor_id != source.neighbor_id:
                         neighbor.send_packet(data)
@@ -95,7 +99,7 @@ class MeshNode(object):
 
         elif packet_type == 'O':
             # bestätigung übermitteln
-            print u"bestätigung für packet %s erhalten" % packet_id
+            dbg( u"Bestätigung für Paket %s erhalten" % packet_id )
             if packet_id not in self.package_tracker:
                 raise Exception(u"Bestätigung für packet %s jedoch kein packet vorhanden" % packet_id)
             # node könnte schon wieder disconneted sein todo
