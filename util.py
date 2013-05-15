@@ -8,7 +8,7 @@ import sys
 
 def connect_package(host, port):
     content = struct.pack('!4sH122s', socket.inet_aton(host), port, "\0"*122)
-    packet = struct.pack('!HBc128s', 1, 0, 'N', content)
+    packet  = struct.pack('!HBc128s', 1, 0, 'N', content)
     return packet
 
 
@@ -43,23 +43,23 @@ if __name__ == '__main__':
     target_port_parser = argparse.ArgumentParser(add_help=False)
     target_port_parser.add_argument('connect_port', type=int)
 
-    connect_parser = subparsers.add_parser('connect', help='connect 2 nodes', parents=[target_port_parser])
-    connect_parser.add_argument('target_port', type=int)
+    connect_parser = subparsers.add_parser(      'connect',      help=u'2 Knoten verbinden',       parents=[target_port_parser])
+    connect_parser.add_argument(                 'target_port',                                    type=int)
 
-    connect_line_parser = subparsers.add_parser('connect_line', help='n nodes in a line', parents=[target_port_parser])
-    connect_line_parser.add_argument('node_count', type=int)
+    connect_line_parser = subparsers.add_parser( 'connect_line', help=u'N Knoten hintereinander',  parents=[target_port_parser])
+    connect_line_parser.add_argument(            'node_count',                                     type=int)
 
-    send_packet_parser = subparsers.add_parser('send_packet', help='send a packet to a node', parents=[target_port_parser])
-    send_packet_parser.add_argument('target', help=u'0 für quelle 1 für ziel', type=int)
-    send_packet_parser.add_argument('packet_nr', help='Paket Nummer', type=int)
+    send_packet_parser = subparsers.add_parser(  'send_packet',  help=u'Paket an Knoten schicken', parents=[target_port_parser])
+    send_packet_parser.add_argument(             'target',       help=u'0 für Quelle 1 für Ziel',  type=int)
+    send_packet_parser.add_argument(             'packet_nr',    help=u'Paket Nummer',             type=int)
 
-    send_packets_parser = subparsers.add_parser('send_packets', help='n packets to a node', parents=[target_port_parser])
-    send_packets_parser.add_argument('target', help=u'0 für quelle 1 für ziel', type=int)
-    send_packets_parser.add_argument('packet_nr', help='erste Paket Nummer', type=int)
-    send_packets_parser.add_argument('packet_count', help='anzahl Pakete', type=int)
+    send_packets_parser = subparsers.add_parser( 'send_packets', help=u'n Pakete an Knoten',       parents=[target_port_parser])
+    send_packets_parser.add_argument(            'target',       help=u'0 für Quelle 1 für Ziel',  type=int)
+    send_packets_parser.add_argument(            'packet_nr',    help=u'erste Paketnummer',        type=int)
+    send_packets_parser.add_argument(            'packet_count', help=u'Anzahl Pakete',            type=int)
 
-    send_packets_parser = subparsers.add_parser('pipe', help='send stdin to a node', parents=[target_port_parser])
-    send_packets_parser.add_argument('target', help=u'0 für quelle 1 für ziel', type=int)
+    send_packets_parser = subparsers.add_parser( 'pipe',         help=u'Stdin an Knoten schicken', parents=[target_port_parser])
+    send_packets_parser.add_argument(            'target',       help=u'0 für Quelle 1 für Ziel',  type=int)
 
     args = parser.parse_args()
 
