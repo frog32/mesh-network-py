@@ -3,6 +3,7 @@
 import argparse
 import socket
 import struct
+import sys
 
 
 def connect_package(host, port):
@@ -17,12 +18,23 @@ def connect_local_nodes(port1, port2):
     s.sendall(connect_package('127.0.0.1', port2))
     s.close()
 
-
 def send_data_packet(s, target, packet_nr):
     packet = struct.pack('!HBc128s', packet_nr, target, 'C', " " * 128)
     s.sendall(packet)
     d = s.recv(132)
 
+def pipe(s, target):
+    eof = False
+    packet_nr = 0
+    while not eof:
+	data = sys.stdin.read(128)
+	if data == "":
+	    eof = True
+	    break
+        packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
+        s.sendall(packet)
+        d = s.recv(132)
+	packet_nr += 1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mesh network test util')
@@ -46,6 +58,9 @@ if __name__ == '__main__':
     send_packets_parser.add_argument('packet_nr', help='erste Paket Nummer', type=int)
     send_packets_parser.add_argument('packet_count', help='anzahl Pakete', type=int)
 
+    send_packets_parser = subparsers.add_parser('pipe', help='send stdin to a node', parents=[target_port_parser])
+    send_packets_parser.add_argument('target', help=u'0 für quelle 1 für ziel', type=int)
+
     args = parser.parse_args()
 
     if args.command == 'connect':
@@ -63,4 +78,9 @@ if __name__ == '__main__':
         s.connect(('127.0.0.1', args.connect_port))
         for i in range(args.packet_count):
             send_data_packet(s, args.target, args.packet_nr + i)
+        s.close()
+    elif args.command == 'pipe':
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(('127.0.0.1', args.connect_port))
+        pipe(s, args.target)
         s.close()
