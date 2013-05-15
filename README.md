@@ -30,6 +30,10 @@ Gleich wie `send_packet` einfach mit zusätzlichem count Parameter
 meshnode.py
 ===========
 
-Benötigt [twisted](http://twistedmatrix.com/trac/ "twisted framework") um zu laufen. Danach Verwendung wie folgt:
+Benötigt [twisted](http://twistedmatrix.com/trac/ "twisted framework") um zu laufen. Unter Debian kann dieses installiert werden via:
+
+	apt-get install python-twisted-bin
+
+Danach Verwendung wie folgt:
 
 	python meshnode.py -z 3333
