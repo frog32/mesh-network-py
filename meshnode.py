@@ -33,17 +33,17 @@ class MeshNodeProtocol(protocol.Protocol):
 
 class MeshNode(object):
     def __init__(self, port, is_sink, is_source):
-        self.is_source = is_source
-        self.is_sink = is_sink
-        self.factory = protocol.ServerFactory()
-        self.factory.protocol = MeshNodeProtocol
+        self.is_source         = is_source
+        self.is_sink           = is_sink
+        self.factory           = protocol.ServerFactory()
+        self.factory.protocol  = MeshNodeProtocol
         self.factory.mesh_node = self
         reactor.listenTCP(port, self.factory)
 
-        self.neighbors = {}
-        self.valid_routes = {}
-        self.neighbor_id = 0
-        self.package_tracker = {}
+        self.neighbors        = {}
+        self.valid_routes     = {}
+        self.neighbor_id      = 0
+        self.package_tracker  = {}
         self.confirmed_routes = {}
 
     def clean_package_tracker(self, packet_id):
@@ -122,8 +122,8 @@ class MeshNode(object):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='mesh network node.')
     parser.add_argument('port', type=int)
-    parser.add_argument('-z', dest='is_sink', action='store_true', help='is the sink')
-    parser.add_argument('-q', dest='is_source', action='store_true', help='is the source')
+    parser.add_argument('-z', dest='is_sink',    action='store_true', help='is the sink'  )
+    parser.add_argument('-q', dest='is_source',  action='store_true', help='is the source')
 
     args = parser.parse_args()
 
