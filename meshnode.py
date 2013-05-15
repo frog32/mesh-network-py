@@ -75,6 +75,7 @@ class MeshNode(object):
             if self.is_sink and target == 1 or self.is_source and target == 0:
                 # packet is angekommen
 		dbg( "Paket %s angekommen" % packet_id )
+		sys.stdout.write( content )
                 packet = pack(PACKAGE_FORMAT, packet_id, target, 'O', ' ' * 128)
                 source.send_packet(packet)
                 return
