@@ -24,12 +24,10 @@ def send_data_packet(s, target, packet_nr):
     d = s.recv(132)
 
 def pipe(s, target):
-    eof = False
     packet_nr = 0
-    while not eof:
+    while True:
 	data = sys.stdin.read(128)
 	if data == "":
-	    eof = True
 	    break
         packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
         s.sendall(packet)
