@@ -31,14 +31,14 @@ def send_data_packet(s, target, packet_nr):
 def pipe(s, target):
     packet_nr = 0
     while True:
-	data = sys.stdin.read(128)
-	if data == "":
-	    break
+        data = sys.stdin.read(128)
+        if data == "":
+            break
         dbg( "pipe Daten: " + data )
         packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
         s.sendall(packet)
         d = s.recv(132)
-	packet_nr += 1
+        packet_nr += 1
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mesh network test util')

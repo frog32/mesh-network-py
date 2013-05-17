@@ -45,7 +45,7 @@ class MeshNode(object):
         self.package_tracker  = {}
         self.confirmed_routes = {}
 
-	self.dbg("erstellt")
+        self.dbg("erstellt")
 
     def dbg( self, string ):
         if self.be_verbose:
@@ -65,7 +65,7 @@ class MeshNode(object):
     def add_neighbor(self, node):
         self.neighbors[self.neighbor_id] = node
         node.neighbor_id = self.neighbor_id
-	self.dbg( "Verbindung von Nachbar mit ID %s empfangen" % node.neighbor_id )
+        self.dbg( "Verbindung von Nachbar mit ID %s empfangen" % node.neighbor_id )
         self.neighbor_id += 1
 
     def remove_neighbor(self, node):
@@ -83,7 +83,7 @@ class MeshNode(object):
             self.dbg( "Paket Inhalt: %s" % content )
             if self.is_sink and target == 1 or self.is_source and target == 0:
                 # Paket is angekommen
-		sys.stdout.write( content )
+                sys.stdout.write( content )
                 packet = pack(PACKAGE_FORMAT, packet_id, target, 'O', ' ' * 128)
                 source.send_packet(packet)
                 return
@@ -126,7 +126,7 @@ class MeshNode(object):
             factory.mesh_node = self
             host, port, crap = unpack('!4sH122s', content)
             host = inet_ntoa(host)
-	    self.dbg( "erstelle neue Verbindung zu Knoten %s:%d" % (host,port))
+            self.dbg( "erstelle neue Verbindung zu Knoten %s:%d" % (host,port))
             reactor.connectTCP(host, port, factory)
 
 
@@ -141,7 +141,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     m = MeshNode(args.port,
-		 is_sink=args.is_sink, is_source=args.is_source,
-		 be_verbose=('BE_VERBOSE' in environ))
+                 is_sink=args.is_sink, is_source=args.is_source,
+                 be_verbose=('BE_VERBOSE' in environ))
 
     reactor.run()
