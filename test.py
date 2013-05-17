@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 # coding=utf-8
+
+# Copyright (c) 2013, Tomáš Pospíšek and individual contributors.
+# see LICENSE for the license
+
 import argparse
 import random
 import copy
