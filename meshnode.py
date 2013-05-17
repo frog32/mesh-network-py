@@ -35,6 +35,7 @@ class MeshNode(object):
         self.factory           = protocol.ServerFactory()
         self.factory.protocol  = MeshNodeProtocol
         self.factory.mesh_node = self
+        self.port              = port
         self.be_verbose        = be_verbose
         reactor.listenTCP(port, self.factory)
 
@@ -51,7 +52,7 @@ class MeshNode(object):
             node_type = ' '
             if self.is_sink:     node_type = 'Z'
             elif self.is_source: node_type = 'Q'
-            sys.stderr.write( ("Knoten %s: " % node_type) + string + "\n")
+            sys.stderr.write( ("Knoten %s %d: " % (node_type, self.port)) + string + "\n")
 
     def clean_package_tracker(self, packet_id):
         if packet_id in self.package_tracker:
