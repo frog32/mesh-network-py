@@ -11,6 +11,7 @@ import subprocess
 import time
 import select
 
+# add your mesh implementation to this array
 implementations = [ './meshnode.py' ]
 
 BASE_PORT = 3333
@@ -120,7 +121,11 @@ def receive( nodes_sink ):
 # main()
 if __name__ == '__main__':
   #
-  parser = argparse.ArgumentParser(description='Mesh network test harness')
+  parser = argparse.ArgumentParser(description='Mesh network test harness. ' +
+                                               'Please edit the variable "implementations" ' +
+					       'at the top of this file to test with additional' +
+					       'mesh implementations')
+
   parser.add_argument('-v',              help='be verbose',       dest='be_verbose', action='store_true')
   parser.add_argument('n_intermediates', help="connecting nodes", type=int, nargs='?', default=1)
   parser.add_argument('n_sources',       help="source nodes",     type=int, nargs='?', default=1)
