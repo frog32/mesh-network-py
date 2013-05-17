@@ -5,6 +5,8 @@ import socket
 import struct
 import sys
 
+def dbg(message):
+    sys.stderr.write("Util: " + message + "\n")
 
 def connect_package(host, port):
     content = struct.pack('!4sH122s', socket.inet_aton(host), port, "\0"*122)
@@ -13,6 +15,7 @@ def connect_package(host, port):
 
 
 def connect_local_nodes(port1, port2):
+    dbg("verbinde %d mit %d" % (port1, port2))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port1))
     s.sendall(connect_package('127.0.0.1', port2))
@@ -29,6 +32,7 @@ def pipe(s, target):
 	data = sys.stdin.read(128)
 	if data == "":
 	    break
+        dbg( "pipe Daten: " + data )
         packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
         s.sendall(packet)
         d = s.recv(132)

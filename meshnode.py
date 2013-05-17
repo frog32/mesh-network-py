@@ -11,10 +11,6 @@ import sys
 
 PACKAGE_FORMAT = '!HBc128s'
 
-def dbg( string ):
-    sys.stderr.write( string + "\n")
-
-
 class MeshNodeProtocol(protocol.Protocol):
 
     def dataReceived(self, data):
@@ -46,6 +42,14 @@ class MeshNode(object):
         self.package_tracker  = {}
         self.confirmed_routes = {}
 
+	self.dbg("erstellt")
+
+    def dbg( self, string ):
+        node_type = ' '
+        if self.is_sink:     node_type = 'Z'
+        elif self.is_source: node_type = 'Q'
+        sys.stderr.write( ("Knoten %s: " % node_type) + string + "\n")
+
     def clean_package_tracker(self, packet_id):
         if packet_id in self.package_tracker:
             try:
@@ -57,7 +61,7 @@ class MeshNode(object):
     def add_neighbor(self, node):
         self.neighbors[self.neighbor_id] = node
         node.neighbor_id = self.neighbor_id
-	dbg( "Nachbar hinzugekommen mit ID %s" % node.neighbor_id )
+	self.dbg( "Verbindung von Nachbar mit ID %s empfangen" % node.neighbor_id )
         self.neighbor_id += 1
 
     def remove_neighbor(self, node):
@@ -66,15 +70,15 @@ class MeshNode(object):
             if self.valid_routes[target] == node:
                 del self.valid_routes[target]
 
-        dbg( "Nachbar verschwunden mit ID %s" % node.neighbor_id )
+        self.dbg( "Verbindung zu  Nachbar mit ID %s geschlossen" % node.neighbor_id )
 
     def handle_packet(self, data, source):
         packet_id, target, packet_type, content = unpack(PACKAGE_FORMAT, data)
-        # dbg( "Paket erhalten ID=%s, Typ=%s" % (packet_id, packet_type) )
+        self.dbg( "Paket Typ %s mit ID %s erhalten" % (packet_type, packet_id) )
         if packet_type == 'C':
+            self.dbg( "Paket Inhalt: %s" % content )
             if self.is_sink and target == 1 or self.is_source and target == 0:
                 # Paket is angekommen
-		dbg( "Paket %s angekommen" % packet_id )
 		sys.stdout.write( content )
                 packet = pack(PACKAGE_FORMAT, packet_id, target, 'O', ' ' * 128)
                 source.send_packet(packet)
@@ -90,7 +94,7 @@ class MeshNode(object):
                 self.valid_routes[target].send_packet(data)
             else:
                 # Route existiert nicht
-                dbg( 'Route existiert nicht' )
+                self.dbg( 'Route existiert nicht' )
                 for neighbor_id, neighbor in self.neighbors.items():
                     if neighbor_id != source.neighbor_id:
                         neighbor.send_packet(data)
@@ -100,7 +104,7 @@ class MeshNode(object):
 
         elif packet_type == 'O':
             # Bestätigung übermitteln
-            dbg( u"Bestätigung für Paket %s erhalten" % packet_id )
+            self.dbg( "Bestaetigung für Paket %s erhalten" % packet_id )
             if packet_id not in self.package_tracker:
                 raise Exception(u"Bestätigung für Paket %s jedoch kein Paket vorhanden" % packet_id)
             # Knoten könnte schon wieder disconnected sein todo
@@ -117,7 +121,9 @@ class MeshNode(object):
             factory.protocol = MeshNodeProtocol
             factory.mesh_node = self
             host, port, crap = unpack('!4sH122s', content)
-            reactor.connectTCP(inet_ntoa(host), port, factory)
+            host = inet_ntoa(host)
+	    self.dbg( "erstelle neue Verbindung zu Knoten %s:%d" % (host,port))
+            reactor.connectTCP(host, port, factory)
 
 
 if __name__ == '__main__':
