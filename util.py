@@ -5,8 +5,10 @@ import socket
 import struct
 import sys
 
+be_verbose = False
+
 def dbg(message):
-    sys.stderr.write("Util: " + message + "\n")
+    if be_verbose: sys.stderr.write("Util: " + message + "\n")
 
 def connect_package(host, port):
     content = struct.pack('!4sH122s', socket.inet_aton(host), port, "\0"*122)
@@ -40,6 +42,8 @@ def pipe(s, target):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mesh network test util')
+    parser.add_argument('-v', help='be verbose', dest='be_verbose', action='store_true')
+
     subparsers = parser.add_subparsers(help='commands', dest='command')
 
     target_port_parser = argparse.ArgumentParser(add_help=False)
@@ -64,6 +68,8 @@ if __name__ == '__main__':
     send_packets_parser.add_argument(            'target',       help=u'0 für Quelle 1 für Ziel',  type=int)
 
     args = parser.parse_args()
+
+    be_verbose = args.be_verbose
 
     if args.command == 'connect':
         connect_local_nodes(args.connect_port, args.target_port)

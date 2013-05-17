@@ -5,6 +5,7 @@ from twisted.internet import reactor, protocol, task
 from struct import pack, unpack
 from socket import inet_ntoa
 from random import randint
+from os     import environ
 import argparse
 import sys
 
@@ -28,12 +29,13 @@ class MeshNodeProtocol(protocol.Protocol):
 
 
 class MeshNode(object):
-    def __init__(self, port, is_sink, is_source):
+    def __init__(self, port, is_sink, is_source, be_verbose):
         self.is_source         = is_source
         self.is_sink           = is_sink
         self.factory           = protocol.ServerFactory()
         self.factory.protocol  = MeshNodeProtocol
         self.factory.mesh_node = self
+        self.be_verbose        = be_verbose
         reactor.listenTCP(port, self.factory)
 
         self.neighbors        = {}
@@ -45,10 +47,11 @@ class MeshNode(object):
 	self.dbg("erstellt")
 
     def dbg( self, string ):
-        node_type = ' '
-        if self.is_sink:     node_type = 'Z'
-        elif self.is_source: node_type = 'Q'
-        sys.stderr.write( ("Knoten %s: " % node_type) + string + "\n")
+        if self.be_verbose:
+            node_type = ' '
+            if self.is_sink:     node_type = 'Z'
+            elif self.is_source: node_type = 'Q'
+            sys.stderr.write( ("Knoten %s: " % node_type) + string + "\n")
 
     def clean_package_tracker(self, packet_id):
         if packet_id in self.package_tracker:
@@ -127,12 +130,17 @@ class MeshNode(object):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='mesh network node.')
+    parser = argparse.ArgumentParser(description='mesh network node',
+                                     epilog='set the environment variable BE_VERBOSE to enable debugging output')
+
     parser.add_argument('port', type=int)
     parser.add_argument('-z', dest='is_sink',    action='store_true', help='is the sink'  )
     parser.add_argument('-q', dest='is_source',  action='store_true', help='is the source')
 
     args = parser.parse_args()
 
-    m = MeshNode(args.port, is_sink=args.is_sink, is_source=args.is_source)
+    m = MeshNode(args.port,
+		 is_sink=args.is_sink, is_source=args.is_source,
+		 be_verbose=('BE_VERBOSE' in environ))
+
     reactor.run()
