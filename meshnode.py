@@ -84,6 +84,7 @@ class MeshNode(object):
             if self.is_sink and target == 1 or self.is_source and target == 0:
                 # Paket is angekommen
                 sys.stdout.write( content )
+                sys.stdout.flush()
                 packet = pack(PACKAGE_FORMAT, packet_id, target, 'O', ' ' * 128)
                 source.send_packet(packet)
                 return
