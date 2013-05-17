@@ -11,7 +11,7 @@ import subprocess
 import time
 import select
 
-# add your mesh implementation to this array
+# add path to your mesh implementation to this array
 implementations = [ './meshnode.py' ]
 
 BASE_PORT = 3333
