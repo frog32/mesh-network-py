@@ -30,12 +30,13 @@ class MeshNode(object):
       self.executable = get_random( implementations )
 
       command = [ self.executable ]
+
+      command += [ str(port) ]
+
       if self.is_source:
         command += [ '-q' ]
       elif self.is_sink:
         command += [ '-z' ]
-
-      command += [ str(port) ]
 
       env=None
       if be_verbose: env={"BE_VERBOSE": "1"}
@@ -169,7 +170,7 @@ if __name__ == '__main__':
   dbg("warte, dass Daten Netz durchqueren")
   time.sleep(1)
 
-  dbg(u"empfange und überprüfe Daten")
+  dbg(u"empfange und ueberpruefe Daten")
   exit_code = 127 # fail
   message = receive( nodes_sink )
   if message == THE_MESSAGE:
