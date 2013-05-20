@@ -170,7 +170,7 @@ if __name__ == '__main__':
   dbg("warte, dass Daten Netz durchqueren")
   time.sleep(1)
 
-  dbg(u"empfange und ueberpruefe Daten")
+  dbg("empfange und ueberpruefe Daten")
   exit_code = 127 # fail
   message = receive( nodes_sink )
   if message == THE_MESSAGE:
