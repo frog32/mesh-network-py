@@ -1,6 +1,35 @@
+test.py
+=======
+Wie testen:
+
+1. in test.py die folgende Zeile anpassen und dort './meshnode.py' mit dem Pfad zur eigenen Implementation ersetzen
+
+	implementations = [ './meshnode.py' ]
+
+2. Test starten via
+
+       python test.py
+
+3. weitere Hilfe via
+
+	python test.py --help
+	usage: test.py [-h] [-v] [n_intermediates] [n_sources] [n_sinks]
+	
+	Mesh network test harness. Please edit the variable "implementations" at the
+	top of this file to test with additionalmesh implementations.
+	
+	positional arguments:
+	  n_intermediates  connecting nodes
+	  n_sources        source nodes
+	  n_sinks          sink nodes
+	
+	optional arguments:
+	  -h, --help       show this help message and exit
+	  -v               be verbose
+
 util.py
 =======
-Weitere erklährungen sind mit `./util.py -h` verfügbar.
+Weitere Erklärungen sind mit `./util.py -h` verfügbar.
 
 zwei lokale Nodes verbinden
 ---------------------------
