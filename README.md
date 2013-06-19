@@ -13,15 +13,16 @@ Wie testen:
 3. weitere Hilfe via
 
 	python test.py --help
-	usage: test.py [-h] [-v] [n_intermediates] [n_sources] [n_sinks]
+	usage: test.py [-h] [-v] [n_intermediates] [n_sources] [n_sinks] [n_messages]
 	
 	Mesh network test harness. Please edit the variable "implementations" at the
-	top of this file to test with additionalmesh implementations.
+	top of this file to test with additional/alternative mesh implementations.
 	
 	positional arguments:
 	  n_intermediates  connecting nodes
 	  n_sources        source nodes
 	  n_sinks          sink nodes
+	  n_messages       # of messages to send
 	
 	optional arguments:
 	  -h, --help       show this help message and exit

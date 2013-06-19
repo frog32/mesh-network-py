@@ -10,6 +10,7 @@ import copy
 import subprocess
 import time
 import select
+from string import find
 
 # add path to your mesh implementation to this array
 implementations = [ './meshnode.py' ]
@@ -20,6 +21,9 @@ PACKAGE_CONTENT_LENGTH = 128
 
 # must not have a trailing newline
 THE_MESSAGE = "detachement and love"
+
+PASSED    = 0
+FAILED    = 127
 
 be_verbose = False
 
@@ -132,9 +136,10 @@ if __name__ == '__main__':
 					       'additional/alternative mesh implementations.')
 
   parser.add_argument('-v',              help='be verbose',       dest='be_verbose', action='store_true')
-  parser.add_argument('n_intermediates', help="connecting nodes", type=int, nargs='?', default=1)
-  parser.add_argument('n_sources',       help="source nodes",     type=int, nargs='?', default=1)
-  parser.add_argument('n_sinks',         help="sink nodes",       type=int, nargs='?', default=1)
+  parser.add_argument('n_intermediates', help="connecting nodes",      type=int, nargs='?', default=1)
+  parser.add_argument('n_sources',       help="source nodes",          type=int, nargs='?', default=1)
+  parser.add_argument('n_sinks',         help="sink nodes",            type=int, nargs='?', default=1)
+  parser.add_argument('n_messages',      help="# of messages to send", type=int, nargs='?', default=1)
 
   args = parser.parse_args()
 
@@ -169,25 +174,46 @@ if __name__ == '__main__':
   ### do random other interconnects: TODO ##
 
   dbg("sende Daten durch Netz")
-  send( THE_MESSAGE, get_random(nodes_source).port )
+  for i in range(args.n_messages):
+      send( THE_MESSAGE + str(i), get_random(nodes_source).port )
 
   dbg("warte, dass Daten Netz durchqueren")
-  time.sleep(1)
+  time.sleep(2)
 
   dbg("empfange und ueberpruefe Daten")
-  exit_code = 127 # fail
-  message = receive( nodes_sink )
-  if message == THE_MESSAGE:
-    print "Test passed"
-    exit_code = 0
-  else:
-    print "Test failed"
-    print "Expected: " + THE_MESSAGE
-    print "Received: " + message
+  messages = []
+  for i in range(args.n_messages):
+    messages.append( receive( nodes_sink ) )
+
+  exit_code = PASSED
+
+  for i in range(args.n_messages):
+
+    needed_message = THE_MESSAGE + str(i)
+    message_found = False
+
+    for m in range(args.n_messages):
+      if messages[m] == needed_message:
+        message_found = True
+	break
+
+    if message_found == False:
+      print "Failed to find message '" + needed_message + "'"
+      exit_code = FAILED
 
   dbg("beende Knoten")
   for node in nodes_all:
       node.proc.terminate()
       node.proc.wait()
+
+  if exit_code == FAILED:
+    print "Test failed"
+    print "I've received to following messages:"
+
+    for i in range(args.n_messages):
+      print messages[i]
+
+  else:
+    print "Test passed"
 
   exit(exit_code)
