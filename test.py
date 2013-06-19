@@ -202,6 +202,11 @@ if __name__ == '__main__':
       print "Failed to find message '" + needed_message + "'"
       exit_code = FAILED
 
+  if exit_code == FAILED:
+    print "I've received to following messages:"
+    for i in range(args.n_messages):
+      print messages[i]
+
   dbg("beende Knoten")
   for node in nodes_all:
       node.proc.terminate()
@@ -209,11 +214,6 @@ if __name__ == '__main__':
 
   if exit_code == FAILED:
     print "Test failed"
-    print "I've received to following messages:"
-
-    for i in range(args.n_messages):
-      print messages[i]
-
   else:
     print "Test passed"
 
