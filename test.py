@@ -124,8 +124,8 @@ if __name__ == '__main__':
   #
   parser = argparse.ArgumentParser(description='Mesh network test harness. ' +
                                                'Please edit the variable "implementations" ' +
-					       'at the top of this file to test with additional' +
-					       'mesh implementations.')
+					       'at the top of this file to test with ' +
+					       'additional/alternative mesh implementations.')
 
   parser.add_argument('-v',              help='be verbose',       dest='be_verbose', action='store_true')
   parser.add_argument('n_intermediates', help="connecting nodes", type=int, nargs='?', default=1)
