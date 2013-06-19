@@ -16,6 +16,8 @@ implementations = [ './meshnode.py' ]
 
 BASE_PORT = 3333
 
+PACKAGE_CONTENT_LENGTH = 128
+
 # must not have a trailing newline
 THE_MESSAGE = "detachement and love"
 
@@ -114,7 +116,9 @@ def receive( nodes_sink ):
   sink_stdouts = map( lambda sink: sink.proc.stdout, nodes_sink )
   ready = select.select( sink_stdouts, [], [], 3 ) # wait 3s
   if len(ready[0]) > 0:
-    return ready[0][0].readline().rstrip("\n") # match write + "\n" in send
+    package_content = ready[0][0].read(PACKAGE_CONTENT_LENGTH)
+    end = find(package_content, "\n")
+    return package_content[0:end]  # remove "\n": match write + "\n" in send
   else:
     return ""
 
