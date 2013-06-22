@@ -101,8 +101,8 @@ def connect_to_random_node( nodes_connected, node ):
   
 # send message through mesh
 #
-def send( message, port ):
-  command = cmd([ 'pipe', str(port), "1" ]) # 1 == target
+def send( message, port, packet_nr ):
+  command = cmd([ 'pipe', str(port), "1", str(packet_nr) ]) # 1 == target
   dbg("sende an %d: %s" % (port, message)) 
   proc = subprocess.Popen( command, stdin=subprocess.PIPE )
   proc.stdin.write( message + "\n") # match readline in receive
@@ -176,7 +176,7 @@ if __name__ == '__main__':
 
   dbg("sende Daten durch Netz")
   for i in range(args.n_messages):
-      send( THE_MESSAGE + str(i), get_random(nodes_source).port )
+      send( THE_MESSAGE + str(i), get_random(nodes_source).port, i )
 
   dbg("warte, dass Daten Netz durchqueren")
   time.sleep(2)
