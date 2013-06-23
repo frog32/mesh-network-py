@@ -11,9 +11,11 @@ import subprocess
 import time
 import select
 from string import find
+import util
 
-# add path to your mesh implementation to this array
-implementations = [ './meshnode.py' ]
+# add path to your mesh implementation to this array. One per line makes enable/disable easy
+implementations = [ ]
+implementations += [ './meshnode.py' ]
 
 BASE_PORT = 3333
 
@@ -86,15 +88,8 @@ def add_new_sink_to(nodes, port):
 def add_new_intermediate_to(nodes, port):
   nodes.append( MeshNode( port                 ))
 
-# construct 'util' command
-#
-def cmd( args ):
-  command = [ './util.py' ]
-  if be_verbose: command += [ '-v' ]
-  return command + args
-
 def connect( node1, node2 ):
-  subprocess.call( cmd([ 'connect', str(node1.port), str(node2.port) ]))
+  util.connect_local_nodes(node1.port, node2.port)
 
 def connect_to_random_node( nodes_connected, node ):
   connect( get_random(nodes_connected), node)
@@ -102,17 +97,7 @@ def connect_to_random_node( nodes_connected, node ):
 # send message through mesh
 #
 def send( message, port, packet_nr ):
-  command = cmd([ 'pipe', str(port), "1", str(packet_nr) ]) # 1 == target
-  dbg("sende an %d: %s" % (port, message)) 
-  proc = subprocess.Popen( command, stdin=subprocess.PIPE )
-  proc.stdin.write( message + "\n") # match readline in receive
-  proc.stdin.flush()
-  proc.stdin.close()
-  dbg("warte, weiss nicht warum")
-  time.sleep(1) # why is this necessary?
-  proc.terminate()
-  proc.wait()
-  
+  util.send_data_packet(port, 1, packet_nr, message + "\n")
 
 # receive message at one mesh sink
 #
@@ -144,6 +129,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   be_verbose = args.be_verbose
+  util.be_verbose = be_verbose
 
   nodes_all          = []
   nodes_source       = []
@@ -159,7 +145,7 @@ if __name__ == '__main__':
 
   nodes_all = nodes_source + nodes_sink + nodes_intermediate
 
-  sleeptime = len(nodes_all)/10 + 1
+  sleeptime = len(nodes_all)/15 + 2
   dbg("warte auf Start der Knoten: " + str(sleeptime) + "s")
   time.sleep(sleeptime)
 
@@ -171,6 +157,8 @@ if __name__ == '__main__':
   nodes_connected  = [ pop_random(nodes_to_connect) ]
   for i in range(len(nodes_to_connect)):
       connect_to_random_node( nodes_connected, pop_random(nodes_to_connect) )
+  dbg("warte bis alles verbunden ist: 2s")
+  time.sleep(2)
 
   ### do random other interconnects: TODO ##
 

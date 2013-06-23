@@ -23,12 +23,27 @@ def connect_local_nodes(port1, port2):
     s.sendall(connect_package('127.0.0.1', port2))
     s.close()
 
-def send_data_packet(s, target, packet_nr):
-    packet = struct.pack('!HBc128s', packet_nr, target, 'C', " " * 128)
+def send_data_packet_on_socket(s, target, packet_nr, data):
+    packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
     s.sendall(packet)
     d = s.recv(132)
 
-def pipe(s, target, first_packet_nr):
+def send_data_packet(port, target, packet_nr, data):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', port))
+    send_data_packet_on_socket(s, target, packet_nr, data)
+    s.close()
+
+def send_data_packets(port, target, count, packet_nr, data):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', port))
+    for i in range(count):
+        send_data_packet_on_socket(s, target, packet_nr + i, data)
+    s.close()
+
+def pipe(port, target, first_packet_nr):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect(('127.0.0.1', port))
     packet_nr = first_packet_nr
     while True:
         data = sys.stdin.read(128)
@@ -39,6 +54,7 @@ def pipe(s, target, first_packet_nr):
         s.sendall(packet)
         d = s.recv(132)
         packet_nr += 1
+    s.close()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Mesh network test util')
@@ -78,18 +94,8 @@ if __name__ == '__main__':
         for i in range(args.node_count - 1):
             connect_local_nodes(args.connect_port + i, args.connect_port + i + 1)
     elif args.command == 'send_packet':
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', args.connect_port))
-        send_data_packet(s, args.target, args.packet_nr)
-        s.close()
+        send_data_packet(args.connect_port, args.target, args.packet_nr, " " * 128)
     elif args.command == 'send_packets':
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', args.connect_port))
-        for i in range(args.packet_count):
-            send_data_packet(s, args.target, args.packet_nr + i)
-        s.close()
+        send_data_packets(args.connect_port, args.target, args.packet_count, args.packet_nr, " " * 128)
     elif args.command == 'pipe':
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', args.connect_port))
-        pipe(s, args.target, args.packet_nr)
-        s.close()
+        pipe(args.connect_port, args.target, args.packet_nr)
