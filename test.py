@@ -28,6 +28,7 @@ PASSED    = 0
 FAILED    = 127
 
 be_verbose = False
+be_verbose_nodes = False
 
 class MeshNode(object):
    def __init__(self, port, is_sink=False, is_source=False):
@@ -47,7 +48,7 @@ class MeshNode(object):
         command += [ '-z' ]
 
       env=None
-      if be_verbose: env={"BE_VERBOSE": "1"}
+      if be_verbose_nodes: env={"BE_VERBOSE": "1"}
 
       if self.is_source or self.is_sink:
         self.proc = subprocess.Popen( command, env=env, stdout=subprocess.PIPE )
@@ -159,7 +160,8 @@ if __name__ == '__main__':
 					       'at the top of this file to test with ' +
 					       'additional/alternative mesh implementations.')
 
-  parser.add_argument('-v',              help='be verbose',       dest='be_verbose', action='store_true')
+  parser.add_argument('-v',              help='be verbose for test steps',       dest='be_verbose', action='store_true')
+  parser.add_argument('-V',              help='be verbose for mesh nodes',       dest='be_verbose_nodes', action='store_true')
   parser.add_argument('n_intermediates', help="connecting nodes",      type=int, nargs='?', default=1)
   parser.add_argument('n_sources',       help="source nodes",          type=int, nargs='?', default=1)
   parser.add_argument('n_sinks',         help="sink nodes",            type=int, nargs='?', default=1)
@@ -168,6 +170,7 @@ if __name__ == '__main__':
   args = parser.parse_args()
 
   be_verbose = args.be_verbose
+  be_verbose_nodes = args.be_verbose_nodes
   util.be_verbose = be_verbose
 
   nodes_all          = []
