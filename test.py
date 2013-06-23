@@ -97,7 +97,7 @@ def connect_to_random_node( nodes_connected, node ):
 # send message through mesh
 #
 def send( message, port, packet_nr ):
-  util.send_data_packet(port, 1, packet_nr, message + "\n")
+  return util.send_data_packet(port, 1, packet_nr, message + "\n")
 
 # receive message at one mesh sink
 #
@@ -162,9 +162,12 @@ if __name__ == '__main__':
 
   ### do random other interconnects: TODO ##
 
+  exit_code = PASSED
+
   dbg("sende Daten durch Netz")
+  ok_received = []
   for i in range(args.n_messages):
-      send( THE_MESSAGE + str(i), get_random(nodes_source).port, i )
+      ok_received.append( send( THE_MESSAGE + str(i), get_random(nodes_source).port, i ) )
 
   dbg("warte, dass Daten Netz durchqueren")
   time.sleep(2)
@@ -173,8 +176,6 @@ if __name__ == '__main__':
   messages = []
   for i in range(args.n_messages):
     messages.append( receive( nodes_sink ) )
-
-  exit_code = PASSED
 
   for i in range(args.n_messages):
 
@@ -188,6 +189,10 @@ if __name__ == '__main__':
 
     if message_found == False:
       print "Failed to find message '" + needed_message + "'"
+      exit_code = FAILED
+
+    if ok_received[i] == False:
+      print "Failed to receive OK packet for C packet with ID " + str(i)
       exit_code = FAILED
 
   if exit_code == FAILED:

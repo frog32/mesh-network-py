@@ -4,6 +4,7 @@ import argparse
 import socket
 import struct
 import sys
+import select
 
 be_verbose = False
 
@@ -26,13 +27,19 @@ def connect_local_nodes(port1, port2):
 def send_data_packet_on_socket(s, target, packet_nr, data):
     packet = struct.pack('!HBc128s', packet_nr, target, 'C', data)
     s.sendall(packet)
-    d = s.recv(132)
+    ready = select.select( [ s ], [], [], 3 ) # wait 3s
+    if len(ready[0]) > 0:
+        ok_data = s.recv(132)
+        ok_id, ok_target, ok_type, ok_content = struct.unpack('!HBc128s', ok_data)
+        return ok_id == packet_nr and ok_target == target and ok_type == 'O'
+    return False
 
 def send_data_packet(port, target, packet_nr, data):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect(('127.0.0.1', port))
-    send_data_packet_on_socket(s, target, packet_nr, data)
+    ret = send_data_packet_on_socket(s, target, packet_nr, data)
     s.close()
+    return ret
 
 def send_data_packets(port, target, count, packet_nr, data):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
