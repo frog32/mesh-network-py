@@ -49,9 +49,7 @@ class MeshNode(object):
       env=None
       if be_verbose: env={"BE_VERBOSE": "1"}
 
-      if self.is_source:
-        self.proc = subprocess.Popen( command, env=env, stdin =subprocess.PIPE )
-      elif self.is_sink:
+      if self.is_source or self.is_sink:
         self.proc = subprocess.Popen( command, env=env, stdout=subprocess.PIPE )
       else:
         self.proc = subprocess.Popen( command, env=env )
@@ -96,8 +94,8 @@ def connect_to_random_node( nodes_connected, node ):
   
 # send message through mesh
 #
-def send( message, port, packet_nr ):
-  return util.send_data_packet(port, 1, packet_nr, message + "\n")
+def send( target, message, port, packet_nr ):
+  return util.send_data_packet(port, target, packet_nr, message + "\n")
 
 # receive message at one mesh sink
 #
@@ -111,6 +109,47 @@ def receive( nodes_sink ):
   else:
     return ""
 
+
+def test_send_receive(target, sources, sinks):
+  exit_code = PASSED
+
+  dbg("sende Daten durch Netz in Richung " + str(target))
+  ok_received = []
+  for i in range(args.n_messages):
+      ok_received.append( send( target, THE_MESSAGE + str(i), get_random(sources).port, i ) )
+
+  dbg("warte, dass Daten Netz durchqueren")
+  time.sleep(2)
+
+  dbg("empfange und ueberpruefe Daten")
+  messages = []
+  for i in range(args.n_messages):
+    messages.append( receive( sinks ) )
+
+  for i in range(args.n_messages):
+
+    needed_message = THE_MESSAGE + str(i)
+    message_found = False
+
+    for m in range(args.n_messages):
+      if messages[m] == needed_message:
+        message_found = True
+	break
+
+    if message_found == False:
+      print "Failed to find message '" + needed_message + "'"
+      exit_code = FAILED
+
+    if ok_received[i] == False:
+      print "Failed to receive OK packet for C packet with ID " + str(i)
+      exit_code = FAILED
+
+  if exit_code == FAILED:
+    print "I've received to following messages:"
+    for i in range(args.n_messages):
+      print messages[i]
+
+  return exit_code
 
 # main()
 if __name__ == '__main__':
@@ -162,43 +201,9 @@ if __name__ == '__main__':
 
   ### do random other interconnects: TODO ##
 
-  exit_code = PASSED
-
-  dbg("sende Daten durch Netz")
-  ok_received = []
-  for i in range(args.n_messages):
-      ok_received.append( send( THE_MESSAGE + str(i), get_random(nodes_source).port, i ) )
-
-  dbg("warte, dass Daten Netz durchqueren")
-  time.sleep(2)
-
-  dbg("empfange und ueberpruefe Daten")
-  messages = []
-  for i in range(args.n_messages):
-    messages.append( receive( nodes_sink ) )
-
-  for i in range(args.n_messages):
-
-    needed_message = THE_MESSAGE + str(i)
-    message_found = False
-
-    for m in range(args.n_messages):
-      if messages[m] == needed_message:
-        message_found = True
-	break
-
-    if message_found == False:
-      print "Failed to find message '" + needed_message + "'"
-      exit_code = FAILED
-
-    if ok_received[i] == False:
-      print "Failed to receive OK packet for C packet with ID " + str(i)
-      exit_code = FAILED
-
-  if exit_code == FAILED:
-    print "I've received to following messages:"
-    for i in range(args.n_messages):
-      print messages[i]
+  exit_code = test_send_receive(1, nodes_source, nodes_sink)
+  if exit_code == PASSED:
+    exit_code = test_send_receive(0, nodes_sink, nodes_source)
 
   dbg("beende Knoten")
   for node in nodes_all:
