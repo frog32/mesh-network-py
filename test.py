@@ -148,8 +148,8 @@ def test_send_receive(target, sources, sinks):
 
   if exit_code == FAILED:
     print "I've received to following messages:"
-    for i in range(args.n_messages):
-      print messages[i]
+    for msg in messages:
+      print msg
 
   return exit_code
 
