@@ -30,6 +30,8 @@ def send_data_packet_on_socket(s, target, packet_nr, data):
     ready = select.select( [ s ], [], [], 3 ) # wait 3s
     if len(ready[0]) > 0:
         ok_data = s.recv(132)
+        if len(ok_data) != 132:
+          return False
         ok_id, ok_target, ok_type, ok_content = struct.unpack('!HBc128s', ok_data)
         return ok_id == packet_nr and ok_target == target and ok_type == 'O'
     return False
