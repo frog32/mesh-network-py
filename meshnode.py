@@ -111,8 +111,8 @@ class MeshNode(object):
             # Bestätigung übermitteln
             self.dbg( "Bestaetigung für Paket %s erhalten" % packet_id )
             if packet_id not in self.package_tracker:
-                #raise Exception("Bestätigung für Paket %s jedoch kein Paket vorhanden" % packet_id)
-                print >> stderr, Exception("Bestätigung für Paket %s jedoch kein Paket vorhanden" % packet_id)
+                self.dbg("Bestätigung für Paket %s jedoch kein Paket vorhanden\n" % packet_id)
+                return
             # Knoten könnte schon wieder disconnected sein todo
             package_tracker_entry = self.package_tracker[packet_id]
             source_id = package_tracker_entry[0]
