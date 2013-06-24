@@ -117,8 +117,10 @@ def test_send_receive(target, sources, sinks):
 
   dbg("sende Daten durch Netz in Richung " + str(target))
   ok_received = []
+
+  base_id = target == 1 and 0 or args.n_messages
   for i in range(args.n_messages):
-      ok_received.append( send( target, THE_MESSAGE + str(i), get_random(sources).port, i ) )
+      ok_received.append( send( target, THE_MESSAGE + str(i), get_random(sources).port, i + base_id ) )
 
   dbg("warte, dass Daten Netz durchqueren")
   time.sleep(2)
