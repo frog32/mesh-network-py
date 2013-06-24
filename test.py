@@ -100,15 +100,16 @@ def send( target, message, port, packet_nr ):
 
 # receive message at one mesh sink
 #
-def receive( nodes_sink ):
-  sink_stdouts = map( lambda sink: sink.proc.stdout, nodes_sink )
-  ready = select.select( sink_stdouts, [], [], 3 ) # wait 3s
-  if len(ready[0]) > 0:
+def receive( node_sink ):
+  sink_stdouts = [ node_sink.proc.stdout ]
+  ret = []
+  ready = select.select( sink_stdouts, [], [], 0 ) # dont wait
+  while len(ready[0]) > 0:
     package_content = ready[0][0].read(PACKAGE_CONTENT_LENGTH)
     end = find(package_content, "\n")
-    return package_content[0:end]  # remove "\n": match write + "\n" in send
-  else:
-    return ""
+    ret.append( package_content[0:end] )  # remove "\n": match write + "\n" in send
+    ready = select.select( sink_stdouts, [], [], 0 )
+  return ret
 
 
 def test_send_receive(target, sources, sinks):
@@ -124,18 +125,18 @@ def test_send_receive(target, sources, sinks):
 
   dbg("empfange und ueberpruefe Daten")
   messages = []
-  for i in range(args.n_messages):
-    messages.append( receive( sinks ) )
+  for sink in sinks:
+    messages.extend( receive( sink ) )
 
   for i in range(args.n_messages):
 
     needed_message = THE_MESSAGE + str(i)
     message_found = False
 
-    for m in range(args.n_messages):
-      if messages[m] == needed_message:
+    for msg in messages:
+      if msg == needed_message:
         message_found = True
-	break
+        break
 
     if message_found == False:
       print "Failed to find message '" + needed_message + "'"
